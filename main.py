@@ -1,13 +1,6 @@
 from fastapi import FastAPI
+from app.routes import router
 
 app = FastAPI()
 
-
-@app.get("/")
-async def read_root():
-    return {"message": "Chatbot API is running"}
-
-
-@app.get("/health")
-async def health():
-    return {"status": "healthy"}
+app.include_router(router)
