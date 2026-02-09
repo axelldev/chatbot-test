@@ -1,6 +1,13 @@
-def main():
-    print("Hello from chatbot-practice!")
+from fastapi import FastAPI
+
+app = FastAPI()
 
 
-if __name__ == "__main__":
-    main()
+@app.get("/")
+async def read_root():
+    return {"message": "Chatbot API is running"}
+
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
