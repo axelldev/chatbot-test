@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.models import ChatRequest, ChatResponse
-from app.services import add_message, get_conversation_history, get_response
+from app.services import get_response
 
 
 router = APIRouter()
@@ -20,12 +20,9 @@ async def health():
 @router.post("/chat")
 async def chat(request: ChatRequest):
     session_id = request.session_id
-    add_message(session_id, "user", request.message)
-    bot_response = get_response(session_id)
-    add_message(session_id, "assistant", bot_response)
-    history = get_conversation_history(session_id)
+    response = get_response(session_id, request.message)
     return ChatResponse(
         session_id=session_id,
-        response=bot_response,
-        message_count=len(history),
+        response=response,
+        message_count=0,
     )

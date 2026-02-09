@@ -6,22 +6,28 @@ load_dotenv()
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-conversations = dict[str, list]()
+# This dictionary maps the session_id with the conversation_id (open ai conversation identifier)
+conversations = dict[str, str]()
 
 
-def add_message(session_id: str, role: str, content: str):
+def create_conversation(session_id: str) -> str:
+    conversation = client.conversations.create(metadata={"session_id": session_id})
+    conversations[session_id] = conversation.id
+    return conversation.id
+
+
+def get_conversation(session_id: str) -> str:
     if session_id not in conversations:
-        conversations[session_id] = []
-    conversations[session_id].append({"role": role, "content": content})
-
-
-def get_conversation_history(session_id: str) -> list:
-    if session_id not in conversations:
-        return []
+        return create_conversation(session_id)
     return conversations[session_id]
 
 
-def get_response(session_id: str) -> str:
-    messages = get_conversation_history(session_id)
-    response = client.chat.completions.create(model="gpt-5-mini", messages=messages)
-    return response.choices[0].message.content
+def get_response(session_id: str, message: str) -> str:
+    try:
+        conversation_id = get_conversation(session_id)
+        response = client.responses.create(
+            model="gpt-5-mini", input=message, conversation=conversation_id
+        )
+        return response.output_text
+    except Exception as e:
+        print(e)
